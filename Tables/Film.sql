@@ -14,6 +14,24 @@ CREATE TABLE [dbo].[Film] (
     CONSTRAINT [FK_Filmy_Rezyser] FOREIGN KEY ([RezyseriaID]) REFERENCES [dbo].[Rezyser] ([RezyserID])
 );
 
+CREATE OR ALTER TRIGGER dbo.TGR_Film_Gatunek_LiczbaFilmow
+ON dbo.Film
+FOR INSERT, DELETE, UPDATE
+AS
+BEGIN
 
-GO
+	SET NOCOUNT ON
+
+	UPDATE Gatunek
+	SET LiczbaFilmow = (SELECT COUNT(*) FROM Film
+		WHERE Film.GatunekID = Gatunek.GatunekID)
+	WHERE GatunekID IN (
+		SELECT DISTINCT GatunekID FROM inserted
+		UNION 
+		SELECT DISTINCT GatunekID FROM deleted
+		)
+
+END
+
+GO;
 
